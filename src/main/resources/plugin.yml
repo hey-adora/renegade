@@ -1,0 +1,4 @@
+name: renegade
+version: '${project.version}'
+main: org.hey.renegade.Renegade
+api-version: '1.20'
