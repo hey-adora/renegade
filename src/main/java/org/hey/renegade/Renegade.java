@@ -1,8 +1,6 @@
 package org.hey.renegade;
 
 import org.bukkit.BanList;
-import org.bukkit.ChatColor;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.Server;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -12,22 +10,17 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.player.*;
+import org.bukkit.event.server.ServerCommandEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.profile.PlayerProfile;
-import org.bukkit.util.io.BukkitObjectOutputStream;
 
 import java.io.*;
 import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
-import java.util.Date;
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
-import java.util.zip.GZIPInputStream;
-import java.util.zip.GZIPOutputStream;
-
 
 
 public final class Renegade extends JavaPlugin implements Listener {
@@ -39,17 +32,25 @@ public final class Renegade extends JavaPlugin implements Listener {
         return Renegade.path + Renegade.name;
     }
 
-    public void write(Renegade.Player player)  {
+    public void add_allowed_player(Renegade.Player player)  {
         try {
-            List<Renegade.Player> allowed_players = read();
+            boolean updated = false;
+            List<Renegade.Player> allowed_players = get_allowed_players();
             for (int i = 0; i < allowed_players.size(); i++) {
                 Renegade.Player existing_player = allowed_players.get(i);
-                if (Objects.equals(existing_player.name, player.name) && !Objects.equals(player.ip, existing_player.ip)) {
+                if (Objects.equals(existing_player.name.toLowerCase(), player.name.toLowerCase())) {
                     allowed_players.set(i, player);
+                    updated = true;
+                    break;
                 }
             }
             StringBuilder output = new StringBuilder(Renegade.version + "\n");
-            output.append(player.name).append(":").append(player.ip).append("\n");
+            for (Renegade.Player allowed_player : allowed_players) {
+                output.append(allowed_player.name).append(":").append(allowed_player.ip).append("\n");
+            }
+            if (!updated) {
+                output.append(player.name).append(":").append(player.ip).append("\n");
+            }
 
             FileWriter file_writer = new FileWriter(get_path(), false);
             BufferedWriter writer = new BufferedWriter(file_writer);
@@ -60,7 +61,31 @@ public final class Renegade extends JavaPlugin implements Listener {
         }
     }
 
-    public List<Renegade.Player> read() throws IOException {
+    public void remove_allowed_player(String name)  {
+        try {
+            List<Renegade.Player> allowed_players = get_allowed_players();
+            for (int i = 0; i < allowed_players.size(); i++) {
+                Renegade.Player existing_player = allowed_players.get(i);
+                if (Objects.equals(existing_player.name.toLowerCase(), name.toLowerCase())) {
+                    allowed_players.remove(i);
+                    break;
+                }
+            }
+            StringBuilder output = new StringBuilder(Renegade.version + "\n");
+            for (Renegade.Player allowed_player : allowed_players) {
+                output.append(allowed_player.name).append(":").append(allowed_player.ip).append("\n");
+            }
+
+            FileWriter file_writer = new FileWriter(get_path(), false);
+            BufferedWriter writer = new BufferedWriter(file_writer);
+            writer.write(output.toString());
+            writer.close();
+        } catch (IOException e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
+    public List<Renegade.Player> get_allowed_players() throws IOException {
         try {
             FileReader file_reader = new FileReader(get_path());
             BufferedReader reader = new BufferedReader(file_reader);
@@ -69,7 +94,7 @@ public final class Renegade extends JavaPlugin implements Listener {
             String result;
             while ((result = reader.readLine()) != null) {
                 String[] player = result.split(":");
-                System.out.println("here: "+player[0]+player[1]);
+                //System.out.println("here: "+player[0]+player[1]);
                 players.add(new Renegade.Player(player[0], player[1]));
             }
             return players;
@@ -81,7 +106,7 @@ public final class Renegade extends JavaPlugin implements Listener {
 
     public boolean exists(List<Renegade.Player> players, Renegade.Player new_player) {
         for (Player player : players) {
-            if (Objects.equals(player.name, new_player.name) && Objects.equals(player.ip, new_player.ip)) {
+            if (Objects.equals(player.name.toLowerCase(), new_player.name.toLowerCase()) && Objects.equals(player.ip, new_player.ip)) {
                 return true;
             }
         }
@@ -117,7 +142,8 @@ public final class Renegade extends JavaPlugin implements Listener {
         check_version();
 
         getServer().getPluginManager().registerEvents(this, this);
-        getCommand("add_ip").setExecutor(new Renegade.CommandAdd());
+        getCommand("allow").setExecutor(new Renegade.CommandAdd());
+        getCommand("deny").setExecutor(new Renegade.CommandRemove());
 
     }
 
@@ -126,6 +152,10 @@ public final class Renegade extends JavaPlugin implements Listener {
         // Plugin shutdown logic
     }
 
+//    @EventHandler
+//    public void onServerCommand(ServerCommandEvent event) {
+//        System.out.println("whaaaaaaaa: "+event.getCommand().split(" ")[0]);
+//    }
 
 
     @EventHandler(priority = EventPriority.HIGHEST)
@@ -143,7 +173,7 @@ public final class Renegade extends JavaPlugin implements Listener {
                 reason = "Invalid name.";
                 console.sendMessage("Banned for invalid name: "+ip);
             }
-            else if (!exists(read(), renegete_player)) {
+            else if (!exists(get_allowed_players(), renegete_player)) {
                 reason = "Ask Hey.";
                 console.sendMessage("Banned not whitelisted ip: "+ip);
             }
@@ -195,7 +225,7 @@ public final class Renegade extends JavaPlugin implements Listener {
                 ConsoleCommandSender console = server.getConsoleSender();
 
                 server.unbanIP(inet);
-                write(player);
+                add_allowed_player(player);
 
                 console.sendMessage("Added: "+name+":"+ip);
                 return true;
@@ -205,6 +235,27 @@ public final class Renegade extends JavaPlugin implements Listener {
             }
         }
 
+    }
+
+    public class CommandRemove implements CommandExecutor {
+        @Override
+        public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+            if (args.length != 1) return false;
+            String name = args[0];
+
+            Server server = getServer();
+            ConsoleCommandSender console = server.getConsoleSender();
+
+            remove_allowed_player(name);
+            org.bukkit.entity.Player online_players = server.getPlayer(name);
+            if (online_players != null) {
+                online_players.kickPlayer("Removed.");
+
+            }
+
+            console.sendMessage("Removed: "+name);
+            return true;
+        }
     }
 
     public class Player {
