@@ -12,6 +12,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.*;
 import org.bukkit.event.server.ServerCommandEvent;
+import org.bukkit.permissions.Permissible;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.profile.PlayerProfile;
 
@@ -161,7 +162,7 @@ public final class Renegade extends JavaPlugin implements Listener {
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onPlayerLogin(PlayerLoginEvent event) {
         Server server = getServer();
-        ConsoleCommandSender console = server.getConsoleSender();
+        //ConsoleCommandSender console = server.getConsoleSender();
         org.bukkit.entity.Player player = event.getPlayer();
         String name = player.getName();
         InetAddress inet = event.getAddress();
@@ -171,11 +172,11 @@ public final class Renegade extends JavaPlugin implements Listener {
             String reason = "Ask Hey.";
             if (name.contains(":") || name.contains("\n")){
                 reason = "Invalid name.";
-                console.sendMessage("Banned for invalid name: "+ip);
+                server.broadcast("[RENEGADE]: Banned for invalid name: "+name+":"+ip, server.BROADCAST_CHANNEL_ADMINISTRATIVE);
             }
             else if (!exists(get_allowed_players(), renegete_player)) {
                 reason = "Ask Hey.";
-                console.sendMessage("Banned not whitelisted ip: "+ip);
+                server.broadcast("[RENEGADE]: Banned not whitelisted ip: "+name+":"+ip, server.BROADCAST_CHANNEL_ADMINISTRATIVE);
             }
             else {
                 boolean unbanned = false;
@@ -193,7 +194,7 @@ public final class Renegade extends JavaPlugin implements Listener {
                 }
 
                 if (unbanned) {
-                    console.sendMessage("Unbanned: "+ip);
+                    server.broadcast("[RENEGADE]: Unbanned: "+name+":"+ip, server.BROADCAST_CHANNEL_ADMINISTRATIVE);
                     event.setResult(PlayerLoginEvent.Result.ALLOWED);
                 }
 
@@ -203,7 +204,6 @@ public final class Renegade extends JavaPlugin implements Listener {
             server.banIP(inet);
             event.setKickMessage(reason);
             event.setResult(PlayerLoginEvent.Result.KICK_WHITELIST);
-            System.out.println(name + ":" + ip);
         } catch (IOException e) {
             System.out.println(e.getMessage());
             player.kickPlayer("Error");
@@ -222,12 +222,12 @@ public final class Renegade extends JavaPlugin implements Listener {
                 Renegade.Player player = new Renegade.Player(name, ip);
 
                 Server server = getServer();
-                ConsoleCommandSender console = server.getConsoleSender();
+                //ConsoleCommandSender console = server.getConsoleSender();
 
                 server.unbanIP(inet);
                 add_allowed_player(player);
 
-                console.sendMessage("Added: "+name+":"+ip);
+                server.broadcast("[RENEGADE]: Added: "+name+":"+ip, server.BROADCAST_CHANNEL_ADMINISTRATIVE);
                 return true;
             } catch (IOException e) {
                 System.out.println(e.getMessage());
@@ -244,7 +244,7 @@ public final class Renegade extends JavaPlugin implements Listener {
             String name = args[0];
 
             Server server = getServer();
-            ConsoleCommandSender console = server.getConsoleSender();
+            //ConsoleCommandSender console = server.getConsoleSender();
 
             remove_allowed_player(name);
             org.bukkit.entity.Player online_players = server.getPlayer(name);
@@ -253,7 +253,7 @@ public final class Renegade extends JavaPlugin implements Listener {
 
             }
 
-            console.sendMessage("Removed: "+name);
+            server.broadcast("[RENEGADE]: Removed: "+name, server.BROADCAST_CHANNEL_ADMINISTRATIVE);
             return true;
         }
     }

@@ -4,8 +4,12 @@ main: org.hey.renegade.Renegade
 api-version: '1.20'
 commands:
   allow:
-    description: wowza
+    description: Whitelist person ip.
     usage: /allow name ip
+    permission: 'renegade.allow'
+    permission-message: 'You do not have the necessary permission to run this command'
   deny:
-    description: yowza
+    description: Blacklist person ip.
     usage: /deny name
+    permission: 'renegade.deny'
+    permission-message: 'You do not have the necessary permission to run this command'
