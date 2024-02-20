@@ -7,10 +7,9 @@ import java.util.Objects;
 
 public class WhiteList {
     public static String version = "v1";
-    public static String path = "plugins/renegade/";
     public static String name = "players.txt";
 
-    public class Player {
+    static public class Player {
         public String name;
         public String ip;
 
@@ -20,16 +19,26 @@ public class WhiteList {
         }
     }
 
-    public WhiteList() {
 
+    public static String get_path() {
+        return Renegade.path + WhiteList.name;
     }
 
-
-    String get_path() {
-        return WhiteList.path + WhiteList.name;
+    public static void init() {
+        File file = new File(get_path());
+        if (!file.exists()) {
+            try {
+                FileWriter file_writer = new FileWriter(file);
+                BufferedWriter writer = new BufferedWriter(file_writer);
+                writer.append(WhiteList.version+"\n");
+                writer.close();
+            } catch (IOException e) {
+                System.out.println(e.getMessage());
+            }
+        }
     }
 
-    public void add_allowed_player(WhiteList.Player player)  {
+    public static void add_allowed_player(WhiteList.Player player)  {
         try {
             boolean updated = false;
             List<WhiteList.Player> allowed_players = get_allowed_players();
@@ -58,7 +67,7 @@ public class WhiteList {
         }
     }
 
-    public void remove_allowed_player(String name)  {
+    public static void remove_allowed_player(String name)  {
         try {
             List<WhiteList.Player> allowed_players = get_allowed_players();
             for (int i = 0; i < allowed_players.size(); i++) {
@@ -82,16 +91,14 @@ public class WhiteList {
         }
     }
 
-    public List<WhiteList.Player> get_allowed_players() throws IOException {
+    public static List<WhiteList.Player> get_allowed_players() throws IOException {
         try {
             FileReader file_reader = new FileReader(get_path());
             BufferedReader reader = new BufferedReader(file_reader);
             List<WhiteList.Player> players = new ArrayList<WhiteList.Player>();
-            String version = reader.readLine();
             String result;
             while ((result = reader.readLine()) != null) {
                 String[] player = result.split(":");
-                //System.out.println("here: "+player[0]+player[1]);
                 players.add(new WhiteList.Player(player[0], player[1]));
             }
             return players;
@@ -101,7 +108,8 @@ public class WhiteList {
         }
     }
 
-    public boolean exists(List<WhiteList.Player> players, WhiteList.Player new_player) {
+    public static boolean exists(WhiteList.Player new_player) throws IOException {
+        List<WhiteList.Player> players = WhiteList.get_allowed_players();
         for (WhiteList.Player player : players) {
             if (Objects.equals(player.name.toLowerCase(), new_player.name.toLowerCase()) && Objects.equals(player.ip, new_player.ip)) {
                 return true;
