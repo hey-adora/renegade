@@ -13,3 +13,13 @@ commands:
     usage: /deny name
     permission: 'renegade.deny'
     permission-message: 'You do not have the necessary permission to run this command'
+  backup-now:
+    description: Creates world backup.
+    usage: /backup-now
+    permission: 'renegade.backup'
+    permission-message: 'You do not have the necessary permission to run this command'
+  backup-interval:
+    description: How often to backup the world.
+    usage: /backup-interval
+    permission: 'renegade.backup'
+    permission-message: 'You do not have the necessary permission to run this command'
