@@ -37,6 +37,7 @@ import java.util.logging.Logger;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
+import java.util.concurrent.ThreadLocalRandom;
 
 
 public final class Renegade extends JavaPlugin implements Listener {
@@ -47,54 +48,23 @@ public final class Renegade extends JavaPlugin implements Listener {
         boolean result = file.mkdirs();
     }
 
-    static class MyHandler implements HttpHandler {
-        @Override
-        public void handle(HttpExchange t) throws IOException {
-            String response = "This is the response";
 
-            InputStream is = t.getRequestBody();
-
-
-            byte[] buffer = new byte[4];
-            int r = is.read(buffer);
-            if (r == 4) {
-                ByteBuffer wrapped = ByteBuffer.wrap(buffer);
-                int num = wrapped.getInt();
-
-                System.out.println(num);
-            }
-
-
-            //byte[] bytes = is.readAllBytes();
-
-
-            t.sendResponseHeaders(200, response.length());
-            OutputStream os = t.getResponseBody();
-            os.write(response.getBytes());
-            os.close();
-        }
-    }
 
     @Override
     public void onEnable() {
         System.out.println("Loading renegade");
         create_dirs();
         WhiteList.init();
+        WhiteListPending.init();
+        WhiteListHTTP.init();
 
 
         getServer().getPluginManager().registerEvents(new OnPlayerLogin(), this);
         getCommand("allow").setExecutor(new CommandWhiteListAdd());
         getCommand("deny").setExecutor(new CommandWhiteListRemove());
 
-        HttpServer server = null;
-        try {
-            server = HttpServer.create(new InetSocketAddress(InetAddress.getByName("127.0.0.1"), 8069), 0);
-            server.createContext("/verify", new MyHandler());
-            server.setExecutor(null); // creates a default executor
-            server.start();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+
+
 
     }
 

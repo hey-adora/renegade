@@ -5,6 +5,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.hey.renegade.WhiteList;
+import org.hey.renegade.WhiteListHTTP;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -26,10 +27,11 @@ public class CommandWhiteListAdd implements CommandExecutor {
 
             server.unbanIP(inet);
             WhiteList.add_allowed_player(player);
+            WhiteListHTTP.remove_discord_player(player.name);
 
             server.broadcast("[RENEGADE]: Added: "+name+":"+ip, server.BROADCAST_CHANNEL_ADMINISTRATIVE);
             return true;
-        } catch (IOException e) {
+        } catch (Exception e) {
             System.out.println(e.getMessage());
             return false;
         }

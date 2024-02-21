@@ -9,6 +9,7 @@ import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.profile.PlayerProfile;
 import org.hey.renegade.Renegade;
 import org.hey.renegade.WhiteList;
+import org.hey.renegade.WhiteListPending;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -31,8 +32,13 @@ public class OnPlayerLogin implements Listener {
                 server.broadcast("[RENEGADE]: Banned for invalid name: "+name+":"+ip, server.BROADCAST_CHANNEL_ADMINISTRATIVE);
             }
             else if (!WhiteList.exists(renegete_player)) {
-                reason = "Ask Hey.";
-                server.broadcast("[RENEGADE]: Banned not whitelisted ip: "+name+":"+ip, server.BROADCAST_CHANNEL_ADMINISTRATIVE);
+                WhiteListPending.PendingPlayer pending_player = WhiteListPending.add_pending_player(renegete_player);
+                if (pending_player != null) {
+                    reason = "Verify with /verify " + pending_player.code + "\nIn our discord server #gaming channel.\n(Expires in 10 minutes.)";
+                    server.broadcast("[RENEGADE]: Banned not whitelisted ip: "+name+":"+ip, server.BROADCAST_CHANNEL_ADMINISTRATIVE);
+                } else {
+                    server.broadcast("[RENEGADE]: Failed to create pending player for: "+name+":"+ip, server.BROADCAST_CHANNEL_ADMINISTRATIVE);
+                }
             }
             else {
                 boolean unbanned = false;
@@ -62,7 +68,7 @@ public class OnPlayerLogin implements Listener {
             server.banIP(inet);
             event.setKickMessage(reason);
             event.setResult(PlayerLoginEvent.Result.KICK_WHITELIST);
-        } catch (IOException e) {
+        } catch (Exception e) {
             System.out.println(e.getMessage());
             player.kickPlayer("Error");
             server.banIP(inet);

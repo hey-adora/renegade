@@ -17,6 +17,11 @@ public class WhiteList {
             this.name = name;
             this.ip = ip;
         }
+
+        public Player(WhiteListPending.PendingPlayer player) {
+            this.name = player.name;
+            this.ip = player.ip;
+        }
     }
 
 
@@ -32,37 +37,34 @@ public class WhiteList {
                 BufferedWriter writer = new BufferedWriter(file_writer);
                 writer.append(WhiteList.version+"\n");
                 writer.close();
-            } catch (IOException e) {
+            } catch (Exception e) {
                 System.out.println(e.getMessage());
             }
         }
     }
 
+    public static void add_allowed_player(WhiteListPending.PendingPlayer player) {
+        WhiteList.add_allowed_player(new WhiteList.Player(player));
+    }
+
     public static void add_allowed_player(WhiteList.Player player)  {
         try {
-            boolean updated = false;
+            boolean not_updated = true;
             List<WhiteList.Player> allowed_players = get_allowed_players();
             for (int i = 0; i < allowed_players.size(); i++) {
                 WhiteList.Player existing_player = allowed_players.get(i);
                 if (Objects.equals(existing_player.name.toLowerCase(), player.name.toLowerCase())) {
                     allowed_players.set(i, player);
-                    updated = true;
+                    not_updated = false;
                     break;
                 }
             }
-            StringBuilder output = new StringBuilder(WhiteList.version + "\n");
-            for (WhiteList.Player allowed_player : allowed_players) {
-                output.append(allowed_player.name).append(":").append(allowed_player.ip).append("\n");
-            }
-            if (!updated) {
-                output.append(player.name).append(":").append(player.ip).append("\n");
+            if (not_updated) {
+                allowed_players.add(player);
             }
 
-            FileWriter file_writer = new FileWriter(get_path(), false);
-            BufferedWriter writer = new BufferedWriter(file_writer);
-            writer.write(output.toString());
-            writer.close();
-        } catch (IOException e) {
+            WhiteList.save_allowed_players(allowed_players);
+        } catch (Exception e) {
             System.out.println(e.getMessage());
         }
     }
@@ -77,16 +79,8 @@ public class WhiteList {
                     break;
                 }
             }
-            StringBuilder output = new StringBuilder(WhiteList.version + "\n");
-            for (WhiteList.Player allowed_player : allowed_players) {
-                output.append(allowed_player.name).append(":").append(allowed_player.ip).append("\n");
-            }
-
-            FileWriter file_writer = new FileWriter(get_path(), false);
-            BufferedWriter writer = new BufferedWriter(file_writer);
-            writer.write(output.toString());
-            writer.close();
-        } catch (IOException e) {
+            WhiteList.save_allowed_players(allowed_players);
+        } catch (Exception e) {
             System.out.println(e.getMessage());
         }
     }
@@ -96,13 +90,31 @@ public class WhiteList {
             FileReader file_reader = new FileReader(get_path());
             BufferedReader reader = new BufferedReader(file_reader);
             List<WhiteList.Player> players = new ArrayList<WhiteList.Player>();
+            String version = reader.readLine();
             String result;
             while ((result = reader.readLine()) != null) {
                 String[] player = result.split(":");
                 players.add(new WhiteList.Player(player[0], player[1]));
             }
             return players;
-        } catch (IOException e) {
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            throw e;
+        }
+    }
+
+    public static void save_allowed_players(List<WhiteList.Player> allowed_players) throws IOException {
+        try {
+            StringBuilder output = new StringBuilder(WhiteList.version + "\n");
+            for (WhiteList.Player allowed_player : allowed_players) {
+                output.append(allowed_player.name).append(":").append(allowed_player.ip).append("\n");
+            }
+
+            FileWriter file_writer = new FileWriter(get_path(), false);
+            BufferedWriter writer = new BufferedWriter(file_writer);
+            writer.write(output.toString());
+            writer.close();
+        } catch (Exception e) {
             System.out.println(e.getMessage());
             throw e;
         }
