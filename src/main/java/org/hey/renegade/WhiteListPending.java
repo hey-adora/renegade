@@ -9,7 +9,7 @@ import java.util.concurrent.ThreadLocalRandom;
 public class WhiteListPending {
     public static String version = "v1";
     public static String name = "pending_players.txt";
-    public static long time_limit =  10 * 1000;
+    public static long time_limit = 10 * 60 * 1000;
 
     static public class PendingPlayer {
         public String name;
