@@ -4,10 +4,12 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.logging.Logger;
 
 public class WhiteList {
     public static String version = "v1";
     public static String name = "players.txt";
+
 
     static public class Player {
         public String name;
@@ -38,21 +40,21 @@ public class WhiteList {
                 writer.append(WhiteList.version+"\n");
                 writer.close();
             } catch (Exception e) {
-                System.out.println(e.getMessage());
+                Logger.getLogger("Renegade").info(e.getMessage());
             }
         }
     }
 
     public static void add_allowed_player(WhiteListPending.PendingPlayer player) {
-        WhiteList.add_allowed_player(new WhiteList.Player(player));
+        WhiteList.add_allowed_player(new Player(player));
     }
 
-    public static void add_allowed_player(WhiteList.Player player)  {
+    public static void add_allowed_player(Player player)  {
         try {
             boolean not_updated = true;
-            List<WhiteList.Player> allowed_players = get_allowed_players();
+            List<Player> allowed_players = get_allowed_players();
             for (int i = 0; i < allowed_players.size(); i++) {
-                WhiteList.Player existing_player = allowed_players.get(i);
+                Player existing_player = allowed_players.get(i);
                 if (Objects.equals(existing_player.name.toLowerCase(), player.name.toLowerCase())) {
                     allowed_players.set(i, player);
                     not_updated = false;
@@ -65,15 +67,15 @@ public class WhiteList {
 
             WhiteList.save_allowed_players(allowed_players);
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            Logger.getLogger("Renegade").info(e.getMessage());
         }
     }
 
     public static void remove_allowed_player(String name)  {
         try {
-            List<WhiteList.Player> allowed_players = get_allowed_players();
+            List<Player> allowed_players = get_allowed_players();
             for (int i = 0; i < allowed_players.size(); i++) {
-                WhiteList.Player existing_player = allowed_players.get(i);
+                Player existing_player = allowed_players.get(i);
                 if (Objects.equals(existing_player.name.toLowerCase(), name.toLowerCase())) {
                     allowed_players.remove(i);
                     break;
@@ -81,32 +83,32 @@ public class WhiteList {
             }
             WhiteList.save_allowed_players(allowed_players);
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            Logger.getLogger("Renegade").info(e.getMessage());
         }
     }
 
-    public static List<WhiteList.Player> get_allowed_players() throws IOException {
+    public static List<Player> get_allowed_players() throws IOException {
         try {
             FileReader file_reader = new FileReader(get_path());
             BufferedReader reader = new BufferedReader(file_reader);
-            List<WhiteList.Player> players = new ArrayList<WhiteList.Player>();
+            List<Player> players = new ArrayList<Player>();
             String version = reader.readLine();
             String result;
             while ((result = reader.readLine()) != null) {
                 String[] player = result.split(":");
-                players.add(new WhiteList.Player(player[0], player[1]));
+                players.add(new Player(player[0], player[1]));
             }
             return players;
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            Logger.getLogger("Renegade").info(e.getMessage());
             throw e;
         }
     }
 
-    public static void save_allowed_players(List<WhiteList.Player> allowed_players) throws IOException {
+    public static void save_allowed_players(List<Player> allowed_players) throws IOException {
         try {
             StringBuilder output = new StringBuilder(WhiteList.version + "\n");
-            for (WhiteList.Player allowed_player : allowed_players) {
+            for (Player allowed_player : allowed_players) {
                 output.append(allowed_player.name).append(":").append(allowed_player.ip).append("\n");
             }
 
@@ -115,14 +117,14 @@ public class WhiteList {
             writer.write(output.toString());
             writer.close();
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            Logger.getLogger("Renegade").info(e.getMessage());
             throw e;
         }
     }
 
-    public static boolean exists(WhiteList.Player new_player) throws IOException {
-        List<WhiteList.Player> players = WhiteList.get_allowed_players();
-        for (WhiteList.Player player : players) {
+    public static boolean exists(Player new_player) throws IOException {
+        List<Player> players = WhiteList.get_allowed_players();
+        for (Player player : players) {
             if (Objects.equals(player.name.toLowerCase(), new_player.name.toLowerCase()) && Objects.equals(player.ip, new_player.ip)) {
                 return true;
             }

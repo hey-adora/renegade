@@ -2,6 +2,7 @@ name: renegade
 version: '${project.version}'
 main: org.hey.renegade.Renegade
 api-version: '1.20'
+author: hey-adora
 commands:
   allow:
     description: Whitelist person ip.

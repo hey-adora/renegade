@@ -1,5 +1,6 @@
 package org.hey.renegade.command;
 
+import org.bukkit.ChatColor;
 import org.bukkit.Server;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -7,12 +8,16 @@ import org.bukkit.command.CommandSender;
 import org.hey.renegade.WhiteList;
 import org.hey.renegade.WhiteListHTTP;
 
-import java.io.IOException;
 import java.net.InetAddress;
+import java.util.logging.Logger;
 
 import static org.bukkit.Bukkit.getServer;
 
 public class CommandWhiteListAdd implements CommandExecutor {
+    private final Logger logger;
+    public CommandWhiteListAdd(Logger logger) {
+        this.logger = logger;
+    }
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         try {
@@ -29,10 +34,10 @@ public class CommandWhiteListAdd implements CommandExecutor {
             WhiteList.add_allowed_player(player);
             WhiteListHTTP.remove_discord_player(player.name);
 
-            server.broadcast("[RENEGADE]: Added: "+name+":"+ip, server.BROADCAST_CHANNEL_ADMINISTRATIVE);
+            server.broadcast(ChatColor.YELLOW + "[RENEGADE]: Added: "+name+":"+ip, server.BROADCAST_CHANNEL_ADMINISTRATIVE);
             return true;
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            logger.info(e.getMessage());
             return false;
         }
     }
