@@ -13,6 +13,7 @@ import org.hey.renegade.WhiteListPending;
 
 import java.io.IOException;
 import java.net.InetAddress;
+import java.util.logging.Logger;
 
 import static org.bukkit.Bukkit.getServer;
 
@@ -69,7 +70,7 @@ public class OnPlayerLogin implements Listener {
             event.setKickMessage(reason);
             event.setResult(PlayerLoginEvent.Result.KICK_WHITELIST);
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            Logger.getLogger("Renegade").info(e.getMessage());
             player.kickPlayer("Error");
             server.banIP(inet);
         }

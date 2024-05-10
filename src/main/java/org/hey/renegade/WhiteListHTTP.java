@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.logging.Logger;
 //import org.jooq.types.ULong;
 
 public class WhiteListHTTP {
@@ -29,6 +30,7 @@ public class WhiteListHTTP {
             this.discord_id = discord_id;
         }
     }
+
 
     public static String get_path() {
         return Renegade.path + WhiteListHTTP.name;
@@ -58,25 +60,25 @@ public class WhiteListHTTP {
                 WhiteListPending.PendingPlayer pending_player = WhiteListPending.verify(code);
                 if (pending_player != null) {
                     WhiteListHTTP.DiscordPlayer discord_player = new WhiteListHTTP.DiscordPlayer(pending_player.name, user_id);
-                    //System.out.println("[RENEGADE]: dddddddddddddddddd");
+                    //Logger.getLogger("Renegade").info("[RENEGADE]: dddddddddddddddddd");
                     boolean is_same_discord_player = WhiteListHTTP.verify(discord_player);
                     if (is_same_discord_player) {
-                        //System.out.println("[RENEGADE]: bbbbbbbbbbbbbbbbbbb");
-                        System.out.println("[RENEGADE]: Whitelisted "+user_id+": "+pending_player.name+":"+pending_player.ip+" with code: "+code);
+                        //Logger.getLogger("Renegade").info("[RENEGADE]: bbbbbbbbbbbbbbbbbbb");
+                        Logger.getLogger("Renegade").info("[RENEGADE]: Whitelisted "+user_id+": "+pending_player.name+":"+pending_player.ip+" with code: "+code);
                         WhiteList.add_allowed_player(pending_player);
-                        //System.out.println("[RENEGADE]: ccccccccccccccccc");
+                        //Logger.getLogger("Renegade").info("[RENEGADE]: ccccccccccccccccc");
                         t.sendResponseHeaders(200, 0);
                     } else {
-                        System.out.println("[RENEGADE]: Failed to verify, invalid discord user: "+user_id+" for "+pending_player.name+": with code: "+code);
+                        Logger.getLogger("Renegade").info("[RENEGADE]: Failed to verify, invalid discord user: "+user_id+" for "+pending_player.name+": with code: "+code);
                         t.sendResponseHeaders(401, 0);
                     }
                 } else {
-                    System.out.println("[RENEGADE]: Failed to verify "+user_id+": with code: "+code);
+                    Logger.getLogger("Renegade").info("[RENEGADE]: Failed to verify "+user_id+": with code: "+code);
                     t.sendResponseHeaders(404, 0);
                 }
 
             } else {
-                System.out.println("[RENEGADE]: invalid verification. ");
+                Logger.getLogger("Renegade").info("[RENEGADE]: invalid verification. ");
                 t.sendResponseHeaders(402, 0);
             }
 
@@ -102,7 +104,7 @@ public class WhiteListHTTP {
             server.setExecutor(null); // creates a default executor
             server.start();
         } catch (Exception e) {
-            System.out.println("[RENEGADE]: ERROR: " + e.getMessage());
+            Logger.getLogger("Renegade").info("[RENEGADE]: ERROR: " + e.getMessage());
             throw new RuntimeException(e);
         }
     }
@@ -127,7 +129,7 @@ public class WhiteListHTTP {
                 WhiteListHTTP.save_discord_players(discord_players);
             }
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            Logger.getLogger("Renegade").info(e.getMessage());
         }
         return verified;
     }
@@ -144,7 +146,7 @@ public class WhiteListHTTP {
             }
             WhiteListHTTP.save_discord_players(discord_players);
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            Logger.getLogger("Renegade").info(e.getMessage());
         }
     }
 
@@ -161,7 +163,7 @@ public class WhiteListHTTP {
             }
             return players;
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            Logger.getLogger("Renegade").info(e.getMessage());
             throw e;
         }
     }
@@ -178,7 +180,7 @@ public class WhiteListHTTP {
             writer.write(output.toString());
             writer.close();
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            Logger.getLogger("Renegade").info(e.getMessage());
             throw e;
         }
     }

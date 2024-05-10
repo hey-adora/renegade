@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.logging.Logger;
 
 public class WhiteListPending {
     public static String version = "v1";
@@ -54,7 +55,7 @@ public class WhiteListPending {
                 writer.append(WhiteListPending.version+"\n");
                 writer.close();
             } catch (Exception e) {
-                System.out.println(e.getMessage());
+                Logger.getLogger("Renegade").info(e.getMessage());
             }
         }
 
@@ -77,7 +78,7 @@ public class WhiteListPending {
             WhiteListPending.save_pending_players(pending_players);
             return player;
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            Logger.getLogger("Renegade").info(e.getMessage());
             return null;
         }
     }
@@ -102,7 +103,7 @@ public class WhiteListPending {
             WhiteListPending.save_pending_players(allowed_players);
             return new_pending_player;
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            Logger.getLogger("Renegade").info(e.getMessage());
             return null;
         }
     }
@@ -119,7 +120,7 @@ public class WhiteListPending {
             }
             WhiteListPending.save_pending_players(pending_players);
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            Logger.getLogger("Renegade").info(e.getMessage());
         }
     }
 
@@ -136,7 +137,7 @@ public class WhiteListPending {
             }
             return players;
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            Logger.getLogger("Renegade").info(e.getMessage());
             throw e;
         }
     }

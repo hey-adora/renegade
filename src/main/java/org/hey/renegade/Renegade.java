@@ -42,6 +42,7 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public final class Renegade extends JavaPlugin implements Listener {
     public static String path = "plugins/renegade/";
+    public Logger logger;
 
     public void create_dirs() {
         File file = new File(Renegade.path);
@@ -52,16 +53,17 @@ public final class Renegade extends JavaPlugin implements Listener {
 
     @Override
     public void onEnable() {
-        System.out.println("Loading renegade");
+        logger = getLogger();
+        logger.info("Loading Renegade!");
+        //logger.info("Loading renegade");
         create_dirs();
         WhiteList.init();
         WhiteListPending.init();
         WhiteListHTTP.init();
 
-
         getServer().getPluginManager().registerEvents(new OnPlayerLogin(), this);
-        getCommand("allow").setExecutor(new CommandWhiteListAdd());
-        getCommand("deny").setExecutor(new CommandWhiteListRemove());
+        getCommand("allow").setExecutor(new CommandWhiteListAdd(logger));
+        getCommand("deny").setExecutor(new CommandWhiteListRemove(logger));
 
 
 
@@ -71,6 +73,7 @@ public final class Renegade extends JavaPlugin implements Listener {
     @Override
     public void onDisable() {
         // Plugin shutdown logic
+        logger.info("Disabling Renegade!");
     }
 
 }
